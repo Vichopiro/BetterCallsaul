@@ -13,13 +13,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.bettercallsoul.ui.LoginScreen
-import com.example.bettercallsoul.ui.SaludoScreen
+import com.example.bettercallsoul.ui.NormasScreen
 import com.example.bettercallsoul.ui.theme.BetterCallSoulTheme
 import com.example.bettercallsoul.viewmodel.LoginViewModel
+import com.example.bettercallsoul.viewmodel.NormaViewModel
 
 class MainActivity : ComponentActivity() {
     private val viewModel: LoginViewModel by viewModels()
-
+    private val normaViewModel: NormaViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -35,7 +36,8 @@ class MainActivity : ComponentActivity() {
                         onLogin = viewModel::login
                     )
                 } else {
-                    SaludoScreen(
+                    NormasScreen(
+                        viewModel = normaViewModel,
                         nombre = usuario.nombre,
                         onLogout = viewModel::logout
                     )
