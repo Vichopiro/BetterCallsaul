@@ -5,15 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.bettercallsoul.ui.LoginScreen
-import com.example.bettercallsoul.ui.NormasScreen
+import com.example.bettercallsoul.ui.Navegacion
 import com.example.bettercallsoul.ui.theme.BetterCallSoulTheme
 import com.example.bettercallsoul.viewmodel.LoginViewModel
 import com.example.bettercallsoul.viewmodel.NormaViewModel
@@ -36,7 +29,7 @@ class MainActivity : ComponentActivity() {
                         onLogin = viewModel::login
                     )
                 } else {
-                    NormasScreen(
+                    Navegacion(
                         viewModel = normaViewModel,
                         nombre = usuario.nombre,
                         onLogout = viewModel::logout
