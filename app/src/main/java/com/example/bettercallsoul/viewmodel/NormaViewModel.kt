@@ -5,26 +5,37 @@ import com.example.bettercallsoul.model.Articulo
 import com.example.bettercallsoul.model.Norma
 import com.example.bettercallsoul.repository.NormaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class NormaViewModel : ViewModel() {
     private val repository = NormaRepository()
 
-    val normas = MutableStateFlow<List<Norma>>(value = emptyList())
-    val articulos = MutableStateFlow<List<Articulo>>(emptyList())
-    val tamanoLetra = MutableStateFlow(16)
-    init {
-        cargarNormas()
+    private val _normas = MutableStateFlow(repository.getAll())
+    val normas: StateFlow<List<Norma>> = _normas.asStateFlow()
+
+    private val _articulos = MutableStateFlow<List<Articulo>>(emptyList())
+    val articulos: StateFlow<List<Articulo>> = _articulos.asStateFlow()
+
+    private val _tamanoLetra = MutableStateFlow(TAMANO_INICIAL)
+    val tamanoLetra: StateFlow<Int> = _tamanoLetra.asStateFlow()
+
+    fun cargarArticulos(normaId: Int) {
+        _articulos.value = repository.getArticulos(normaId)
     }
-    private fun cargarNormas() {
-        normas.value = repository.getAll()
+
+    fun aumentarLetra() {
+        if (_tamanoLetra.value < TAMANO_MAXIMO) _tamanoLetra.value += PASO_LETRA
     }
-    fun cargarArticulos(normaId: Int){
-        articulos.value = repository.getArticulos(normaId)
+
+    fun disminuirLetra() {
+        if (_tamanoLetra.value > TAMANO_MINIMO) _tamanoLetra.value -= PASO_LETRA
     }
-    fun aumentarLetra(){
-        if (tamanoLetra.value < 28) tamanoLetra.value += 2
-    }
-    fun disminuirLetra(){
-        if (tamanoLetra.value > 12) tamanoLetra.value -= 2
+
+    private companion object {
+        const val TAMANO_INICIAL = 16
+        const val TAMANO_MINIMO = 12
+        const val TAMANO_MAXIMO = 28
+        const val PASO_LETRA = 2
     }
 }

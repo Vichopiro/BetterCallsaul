@@ -13,13 +13,13 @@ class NormaRepository {
         )
     }
 
-    fun getArticulos(normaId: Int): List<Articulo>{
+    fun getArticulos(normaId: Int): List<Articulo> {
         return (1..3).map { n ->
             Articulo(
                 id = n,
                 normaId = normaId,
-                numero = "Articulo $n",
-                texto = "Texto de ejemplo del artículo \$n. Este contenido es ficticio y sirve para probar la lectura y el tamaño de letra."
+                numero = "Artículo $n",
+                texto = "Texto de ejemplo del artículo $n. Este contenido es ficticio y sirve para probar la lectura y el tamaño de letra."
             )
         }
     }
