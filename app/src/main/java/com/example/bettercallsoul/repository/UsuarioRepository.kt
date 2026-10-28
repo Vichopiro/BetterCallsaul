@@ -23,7 +23,7 @@ class UsuarioRepository(private val usuarioDao: UsuarioDao) {
         val guardado = usuarioDao.buscarPorCorreo(correo) ?: return null
         return if (guardado.claveHash == encriptar(clave)) guardado.aUsuario() else null
     }
-
+    suspend fun buscarPorId(id: Int): Usuario? = usuarioDao.buscarPorId(id)?.aUsuario()
     suspend fun actualizarFoto(idUsuario: Int, ruta: String) {
         usuarioDao.actualizarFoto(idUsuario, ruta)
     }

@@ -14,13 +14,18 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,6 +48,7 @@ fun NormasScreen(
 ) {
     val normas by viewModel.normas.collectAsState()
     val tamano by viewModel.tamanoLetra.collectAsState()
+    var mostrarModal by remember { mutableStateOf(false) }
     val colores = ButtonDefaults.buttonColors(
         containerColor = Amarillo,
         contentColor = Color.Black
@@ -116,11 +122,34 @@ fun NormasScreen(
         }
 
         Button(
-            onClick = onLogout,
+            onClick = { mostrarModal = true },
             colors = colores,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Cerrar sesión", fontWeight = FontWeight.Bold)
         }
+    }
+    if (mostrarModal) {
+        AlertDialog(
+            onDismissRequest = { mostrarModal = false },
+            containerColor = Fondo,
+            titleContentColor = Amarillo,
+            textContentColor = Color.White,
+            title = { Text("Cerrar sesión") },
+            text = { Text("¿Seguro que quieres cerrar sesión?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    mostrarModal = false
+                    onLogout()
+                }) {
+                    Text("Sí, cerrar", color = Amarillo)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarModal = false }) {
+                    Text("Cancelar", color = Gris)
+                }
+            }
+        )
     }
 }

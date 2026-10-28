@@ -1,6 +1,7 @@
 package com.example.bettercallsoul.viewmodel
 
 import android.app.Application
+import android.content.Context
 import android.util.Patterns
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,7 +16,7 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = UsuarioRepository(AppDatabase.obtener(application).usuarioDao())
-
+    private val prefs = application.getSharedPreferences(NOMBRE_PREFS, Context.MODE_PRIVATE)
     var nombre by mutableStateOf("")
         private set
     var apellido by mutableStateOf("")
@@ -40,7 +41,18 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         private set
     var usuario by mutableStateOf<Usuario?>(null)
         private set
-
+    var cargandoSesion by mutableStateOf(false)
+        private set
+    init {
+        val idGuardado = prefs.getInt(CLAVE_ID_USUARIO, -1)
+        if (idGuardado != -1) {
+            cargandoSesion = true
+            viewModelScope.launch {
+                usuario = repository.buscarPorId(idGuardado)
+                cargandoSesion = false
+            }
+        }
+    }
     fun onNombreChange(valor: String) {
         nombre = valor
         errorNombre = null
@@ -80,6 +92,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             if (encontrado == null) {
                 errorCredenciales = MENSAJE_CREDENCIALES_INVALIDAS
             } else {
+                guardarSesion(encontrado.id)
                 usuario = encontrado
             }
         }
@@ -99,6 +112,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             if (nuevo == null) {
                 errorCorreo = MENSAJE_CORREO_REPETIDO
             } else {
+                guardarSesion(nuevo.id)
                 usuario = nuevo
             }
         }
@@ -114,11 +128,14 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun cerrarSesion() {
+        prefs.edit().remove(CLAVE_ID_USUARIO).apply()
         usuario = null
         mostrandoRegistro = false
         limpiarFormulario()
     }
-
+    private fun guardarSesion(id: Int) {
+        prefs.edit().putInt(CLAVE_ID_USUARIO, id).apply()
+    }
     private fun validarNombreYApellido(): Boolean {
         errorNombre = if (nombre.isBlank()) "Ingresa tu nombre" else null
         errorApellido = if (apellido.isBlank()) "Ingresa tu apellido" else null
@@ -152,6 +169,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private companion object {
+        const val NOMBRE_PREFS = "sesion"
+        const val CLAVE_ID_USUARIO = "id_usuario"
         const val LARGO_MINIMO_CLAVE = 6
         const val MENSAJE_CREDENCIALES_INVALIDAS = "Correo o contraseña incorrectos"
         const val MENSAJE_CORREO_REPETIDO = "Este correo ya está registrado"
