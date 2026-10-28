@@ -4,15 +4,22 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.bettercallsoul.viewmodel.LoginViewModel
 import com.example.bettercallsoul.viewmodel.NormaViewModel
 
 @Composable
-fun Navegacion(viewModel: NormaViewModel, nombre: String, onLogout: () -> Unit) {
+fun Navegacion(
+    viewModel: NormaViewModel,
+    loginViewModel: LoginViewModel,
+    nombre: String,
+    onLogout: () -> Unit
+) {
     val navController = rememberNavController()
     NavHost(navController, startDestination = "normas") {
         composable("normas") {
             NormasScreen(
                 viewModel = viewModel,
+                loginViewModel = loginViewModel,
                 nombre = nombre,
                 onLogout = onLogout,
                 onNormaClick = { id -> navController.navigate("articulos/$id") }

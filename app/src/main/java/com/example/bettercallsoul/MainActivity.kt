@@ -27,6 +27,7 @@ class MainActivity : ComponentActivity() {
                 when {
                     usuario != null -> Navegacion(
                         viewModel = normaViewModel,
+                        loginViewModel = loginViewModel,
                         nombre = usuario.nombre,
                         onLogout = loginViewModel::cerrarSesion
                     )

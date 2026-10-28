@@ -1,6 +1,7 @@
 package com.example.bettercallsoul.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,11 +30,13 @@ import androidx.compose.ui.unit.sp
 import com.example.bettercallsoul.ui.theme.Amarillo
 import com.example.bettercallsoul.ui.theme.Fondo
 import com.example.bettercallsoul.ui.theme.Gris
+import com.example.bettercallsoul.viewmodel.LoginViewModel
 import com.example.bettercallsoul.viewmodel.NormaViewModel
 
 @Composable
 fun NormasScreen(
     viewModel: NormaViewModel,
+    loginViewModel: LoginViewModel,
     nombre: String,
     onLogout: () -> Unit,
     onNormaClick: (Int) -> Unit
@@ -52,17 +55,23 @@ fun NormasScreen(
             .navigationBarsPadding()
             .padding(24.dp)
     ) {
-        Text(
-            text = "¡Hola, $nombre!",
-            color = Amarillo,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = "Legislación disponible",
-            color = Gris,
-            fontSize = 16.sp
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            FotoPerfil(loginViewModel)
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = "¡Hola, $nombre!",
+                    color = Amarillo,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Legislación disponible",
+                    color = Gris,
+                    fontSize = 16.sp
+                )
+            }
+        }
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -87,18 +96,19 @@ fun NormasScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clickable { onNormaClick(norma.id) }
                         .padding(vertical = 12.dp)
                 ) {
                     Text(
                         text = norma.nombre,
                         color = Color.White,
-                        fontSize = 18.sp,
+                        fontSize = tamano.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "${norma.materia} · Modificada en ${norma.ultimaModificacion}",
                         color = Gris,
-                        fontSize = 14.sp
+                        fontSize = (tamano - 2).sp
                     )
                 }
                 HorizontalDivider(color = Gris)
@@ -107,10 +117,7 @@ fun NormasScreen(
 
         Button(
             onClick = onLogout,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Amarillo,
-                contentColor = Color.Black
-            ),
+            colors = colores,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Cerrar sesión", fontWeight = FontWeight.Bold)
