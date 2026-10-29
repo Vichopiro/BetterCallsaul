@@ -1,8 +1,10 @@
 package com.example.bettercallsoul.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import com.example.bettercallsoul.R
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -28,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -57,6 +61,11 @@ fun LoginScreen(viewModel: LoginViewModel) {
     ) {
         AnimatedVisibility(visible = tituloVisible, enter = fadeIn() + slideInVertically { -it }) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(
+                    painter = painterResource(R.drawable.logosaulo),
+                    contentDescription = "Logo de Código CH",
+                    modifier = Modifier.size(350.dp)
+                )
                 Text(
                     text = "CÓDIGO CH",
                     color = Amarillo,
