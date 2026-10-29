@@ -1,6 +1,7 @@
 package com.example.bettercallsoul.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import com.example.bettercallsoul.R
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
@@ -59,7 +60,11 @@ fun LoginScreen(viewModel: LoginViewModel) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AnimatedVisibility(visible = tituloVisible, enter = fadeIn() + slideInVertically { -it }) {
+        AnimatedVisibility(
+            visible = tituloVisible,
+            enter = fadeIn(animationSpec = tween(2000)) +
+                    slideInVertically(animationSpec = tween(2000)) { -it }
+        ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
                     painter = painterResource(R.drawable.saulola),
