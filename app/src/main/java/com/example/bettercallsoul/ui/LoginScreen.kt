@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -38,7 +39,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.bettercallsoul.ui.theme.Amarillo
-import com.example.bettercallsoul.ui.theme.Fondo
 import com.example.bettercallsoul.ui.theme.Gris
 import com.example.bettercallsoul.viewmodel.LoginViewModel
 
@@ -50,7 +50,7 @@ fun LoginScreen(viewModel: LoginViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Fondo)
+            .background(Color.Black)
             .statusBarsPadding()
             .navigationBarsPadding()
             .imePadding()
@@ -62,9 +62,9 @@ fun LoginScreen(viewModel: LoginViewModel) {
         AnimatedVisibility(visible = tituloVisible, enter = fadeIn() + slideInVertically { -it }) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
-                    painter = painterResource(R.drawable.logosaulo),
+                    painter = painterResource(R.drawable.saulola),
                     contentDescription = "Logo de Código CH",
-                    modifier = Modifier.size(350.dp)
+                    modifier = Modifier.size(200.dp)
                 )
                 Text(
                     text = "CÓDIGO CH",
@@ -118,5 +118,10 @@ fun LoginScreen(viewModel: LoginViewModel) {
         TextButton(onClick = viewModel::mostrarRegistro) {
             Text("¿No tienes cuenta? Regístrate", color = Amarillo)
         }
+        Image(
+            painter = painterResource(R.drawable.saulolo),
+            contentDescription = "Logo de Código CH",
+            modifier = Modifier.size(250.dp)
+        )
     }
 }
