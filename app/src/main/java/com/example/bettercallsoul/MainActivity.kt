@@ -26,8 +26,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BetterCallSoulTheme {
-
-                //solo para cachar si funciona
                 val usuario = loginViewModel.usuario
                 when {
                     loginViewModel.cargandoSesion -> Box(Modifier.fillMaxSize().background(Fondo))
