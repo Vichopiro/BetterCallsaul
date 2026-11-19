@@ -2,8 +2,20 @@ package com.example.bettercallsoul.repository
 
 import com.example.bettercallsoul.model.Articulo
 import com.example.bettercallsoul.model.Norma
+import com.example.bettercallsoul.remote.RetrofitInstance
 
 class NormaRepository {
+
+
+    suspend fun obtenerNormas(): List<Norma> {
+        return RetrofitInstance.api.obtenerNormas()
+    }
+
+
+
+
+
+
     fun getAll(): List<Norma> {
         return listOf(
             Norma(id = 1, nombre = "Código Civil", materia = "Derecho Civil", ultimaModificacion = 2024),

@@ -1,14 +1,16 @@
 package com.example.bettercallsoul.viewmodel
-
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import com.example.bettercallsoul.model.Articulo
 import com.example.bettercallsoul.model.Norma
 import com.example.bettercallsoul.repository.NormaRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class NormaViewModel : ViewModel() {
+
     private val repository = NormaRepository()
 
     private val _normas = MutableStateFlow(repository.getAll())
@@ -38,4 +40,31 @@ class NormaViewModel : ViewModel() {
         const val TAMANO_MAXIMO = 28
         const val PASO_LETRA = 2
     }
+
+
+
+
+    class NormaViewModel : ViewModel() {
+        private val repository = NormaRepository()
+        private val _normas = MutableStateFlow<List<Norma>>(emptyList())
+        val normas: StateFlow<List<Norma>> = _normas
+
+        init {
+            obtenerNormas()
+        }
+
+        private fun obtenerNormas() {
+            viewModelScope.launch {
+                _normas.value = repository.obtenerNormas()
+            }
+        }
+    }
+
+
+
+
+
+
+
+
 }
