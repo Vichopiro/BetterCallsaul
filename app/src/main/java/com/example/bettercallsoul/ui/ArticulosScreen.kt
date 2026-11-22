@@ -1,6 +1,7 @@
 package com.example.bettercallsoul.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,12 +31,14 @@ import androidx.compose.ui.unit.sp
 import com.example.bettercallsoul.ui.theme.Amarillo
 import com.example.bettercallsoul.ui.theme.Fondo
 import com.example.bettercallsoul.ui.theme.Gris
+import com.example.bettercallsoul.viewmodel.EstadoCarga
 import com.example.bettercallsoul.viewmodel.NormaViewModel
 
 @Composable
 fun ArticulosScreen(viewModel: NormaViewModel, normaId: Int, onVolver: () -> Unit) {
     val normas by viewModel.normas.collectAsState()
     val articulos by viewModel.articulos.collectAsState()
+    val estadoArticulos by viewModel.estadoArticulos.collectAsState()
     val tamano by viewModel.tamanoLetra.collectAsState()
     val norma = normas.find { it.id == normaId }
     val colores = buttonColors(
@@ -85,26 +88,35 @@ fun ArticulosScreen(viewModel: NormaViewModel, normaId: Int, onVolver: () -> Uni
         }
         Spacer(modifier = Modifier.height(8.dp))
 
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            items(articulos) { articulo ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp)
-                ) {
-                    Text(
-                        text = articulo.numero,
-                        color = Amarillo,
-                        fontSize = tamano.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = articulo.texto,
-                        color = Color.White,
-                        fontSize = tamano.sp
-                    )
+        Box(modifier = Modifier.weight(1f)) {
+            when (estadoArticulos) {
+                EstadoCarga.Cargando -> IndicadorCarga()
+                EstadoCarga.Error -> MensajeError(
+                    mensaje = "No se pudieron cargar los artículos. Revisa tu conexión.",
+                    onReintentar = { viewModel.cargarArticulos(normaId) }
+                )
+                EstadoCarga.Exito -> LazyColumn {
+                    items(articulos) { articulo ->
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 12.dp)
+                        ) {
+                            Text(
+                                text = articulo.numero,
+                                color = Amarillo,
+                                fontSize = tamano.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = articulo.texto,
+                                color = Color.White,
+                                fontSize = tamano.sp
+                            )
+                        }
+                        HorizontalDivider(color = Gris)
+                    }
                 }
-                HorizontalDivider(color = Gris)
             }
         }
 

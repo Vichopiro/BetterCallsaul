@@ -2,6 +2,7 @@ package com.example.bettercallsoul.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import com.example.bettercallsoul.ui.theme.Amarillo
 import com.example.bettercallsoul.ui.theme.Fondo
 import com.example.bettercallsoul.ui.theme.Gris
+import com.example.bettercallsoul.viewmodel.EstadoCarga
 import com.example.bettercallsoul.viewmodel.LoginViewModel
 import com.example.bettercallsoul.viewmodel.NormaViewModel
 
@@ -47,6 +49,7 @@ fun NormasScreen(
     onNormaClick: (Int) -> Unit
 ) {
     val normas by viewModel.normas.collectAsState()
+    val estadoNormas by viewModel.estadoNormas.collectAsState()
     val tamano by viewModel.tamanoLetra.collectAsState()
     var mostrarModal by remember { mutableStateOf(false) }
     val colores = ButtonDefaults.buttonColors(
@@ -97,27 +100,36 @@ fun NormasScreen(
         }
         Spacer(modifier = Modifier.height(8.dp))
 
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            items(normas) { norma ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onNormaClick(norma.id) }
-                        .padding(vertical = 12.dp)
-                ) {
-                    Text(
-                        text = norma.nombre,
-                        color = Color.White,
-                        fontSize = tamano.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "${norma.materia} · Modificada en ${norma.ultimaModificacion}",
-                        color = Gris,
-                        fontSize = (tamano - 2).sp
-                    )
+        Box(modifier = Modifier.weight(1f)) {
+            when (estadoNormas) {
+                EstadoCarga.Cargando -> IndicadorCarga()
+                EstadoCarga.Error -> MensajeError(
+                    mensaje = "No se pudieron cargar las normas. Revisa tu conexión.",
+                    onReintentar = { viewModel.cargarNormas() }
+                )
+                EstadoCarga.Exito -> LazyColumn {
+                    items(normas) { norma ->
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onNormaClick(norma.id) }
+                                .padding(vertical = 12.dp)
+                        ) {
+                            Text(
+                                text = norma.nombre,
+                                color = Color.White,
+                                fontSize = tamano.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "${norma.materia} · Modificada en ${norma.ultimaModificacion}",
+                                color = Gris,
+                                fontSize = (tamano - 2).sp
+                            )
+                        }
+                        HorizontalDivider(color = Gris)
+                    }
                 }
-                HorizontalDivider(color = Gris)
             }
         }
 

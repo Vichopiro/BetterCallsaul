@@ -1,4 +1,5 @@
 package com.example.bettercallsoul.viewmodel
+import retrofit2.HttpException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -8,22 +9,64 @@ import com.example.bettercallsoul.model.Articulo
 import com.example.bettercallsoul.model.Norma
 import com.example.bettercallsoul.repository.NormaRepository
 import kotlinx.coroutines.flow.asStateFlow
+import java.io.IOException
+
+sealed interface EstadoCarga {
+    data object Cargando : EstadoCarga
+    data object Exito : EstadoCarga
+    data object Error : EstadoCarga
+}
 
 class NormaViewModel : ViewModel() {
 
     private val repository = NormaRepository()
 
-    private val _normas = MutableStateFlow(repository.getAll())
+    private val _normas = MutableStateFlow<List<Norma>>(emptyList())
     val normas: StateFlow<List<Norma>> = _normas.asStateFlow()
+
+    private val _estadoNormas = MutableStateFlow<EstadoCarga>(EstadoCarga.Cargando)
+    val estadoNormas: StateFlow<EstadoCarga> = _estadoNormas.asStateFlow()
 
     private val _articulos = MutableStateFlow<List<Articulo>>(emptyList())
     val articulos: StateFlow<List<Articulo>> = _articulos.asStateFlow()
 
+    private val _estadoArticulos = MutableStateFlow<EstadoCarga>(EstadoCarga.Cargando)
+    val estadoArticulos: StateFlow<EstadoCarga> = _estadoArticulos.asStateFlow()
+
     private val _tamanoLetra = MutableStateFlow(TAMANO_INICIAL)
     val tamanoLetra: StateFlow<Int> = _tamanoLetra.asStateFlow()
 
+    init {
+        cargarNormas()
+    }
+
+    fun cargarNormas() {
+        _estadoNormas.value = EstadoCarga.Cargando
+        viewModelScope.launch {
+            try {
+                _normas.value = repository.obtenerNormas()
+                _estadoNormas.value = EstadoCarga.Exito
+            } catch (e: IOException) {
+                _estadoNormas.value = EstadoCarga.Error
+            } catch (e: HttpException) {
+                _estadoNormas.value = EstadoCarga.Error
+            }
+        }
+    }
+
     fun cargarArticulos(normaId: Int) {
-        _articulos.value = repository.getArticulos(normaId)
+        _articulos.value = emptyList()
+        _estadoArticulos.value = EstadoCarga.Cargando
+        viewModelScope.launch {
+            try {
+                _articulos.value = repository.obtenerArticulos(normaId)
+                _estadoArticulos.value = EstadoCarga.Exito
+            } catch (e: IOException) {
+                _estadoArticulos.value = EstadoCarga.Error
+            } catch (e: HttpException) {
+                _estadoArticulos.value = EstadoCarga.Error
+            }
+        }
     }
 
     fun aumentarLetra() {
@@ -40,10 +83,6 @@ class NormaViewModel : ViewModel() {
         const val TAMANO_MAXIMO = 28
         const val PASO_LETRA = 2
     }
-
-
-
-
     class NormaViewModel : ViewModel() {
         private val repository = NormaRepository()
         private val _normas = MutableStateFlow<List<Norma>>(emptyList())
@@ -52,19 +91,10 @@ class NormaViewModel : ViewModel() {
         init {
             obtenerNormas()
         }
-
         private fun obtenerNormas() {
             viewModelScope.launch {
                 _normas.value = repository.obtenerNormas()
             }
         }
     }
-
-
-
-
-
-
-
-
 }
