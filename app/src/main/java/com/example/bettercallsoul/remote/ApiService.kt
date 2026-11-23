@@ -6,7 +6,7 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface ApiService {
-    @GET("norma")
+    @GET("normas")
     suspend fun obtenerNormas(): List<Norma>
 
     @GET("articulo")
