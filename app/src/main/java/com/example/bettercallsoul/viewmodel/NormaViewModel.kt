@@ -1,11 +1,13 @@
 package com.example.bettercallsoul.viewmodel
 import retrofit2.HttpException
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import com.example.bettercallsoul.model.Articulo
+import com.example.bettercallsoul.model.Favorito
 import com.example.bettercallsoul.model.Norma
 import com.example.bettercallsoul.repository.NormaRepository
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,9 +19,7 @@ sealed interface EstadoCarga {
     data object Error : EstadoCarga
 }
 
-class NormaViewModel : ViewModel() {
-
-    private val repository = NormaRepository()
+class NormaViewModel(private val repository: NormaRepository) : ViewModel() {
 
     private val _normas = MutableStateFlow<List<Norma>>(emptyList())
     val normas: StateFlow<List<Norma>> = _normas.asStateFlow()
@@ -32,6 +32,8 @@ class NormaViewModel : ViewModel() {
 
     private val _estadoArticulos = MutableStateFlow<EstadoCarga>(EstadoCarga.Cargando)
     val estadoArticulos: StateFlow<EstadoCarga> = _estadoArticulos.asStateFlow()
+    private val _favoritos = MutableStateFlow<List<Favorito>>(emptyList())
+    val favoritos: StateFlow<List<Favorito>> = _favoritos.asStateFlow()
 
     private val _tamanoLetra = MutableStateFlow(TAMANO_INICIAL)
     val tamanoLetra: StateFlow<Int> = _tamanoLetra.asStateFlow()
@@ -68,7 +70,35 @@ class NormaViewModel : ViewModel() {
             }
         }
     }
+    fun cargarFavoritos(usuarioId: Int) {
+        viewModelScope.launch {
+            try {
+                _favoritos.value = repository.obtenerFavoritos(usuarioId)
+            } catch (e: IOException) {
+                _favoritos.value = emptyList()
+            } catch (e: HttpException) {
+                _favoritos.value = emptyList()
+            }
+        }
+    }
 
+    fun alternarFavorito(usuarioId: Int, articuloId: Int) {
+        viewModelScope.launch {
+            try {
+                val existente = _favoritos.value.find { it.articuloId == articuloId }
+                if (existente == null) {
+                    repository.agregarFavorito(usuarioId, articuloId)
+                } else {
+                    repository.eliminarFavorito(existente.id)
+                }
+                _favoritos.value = repository.obtenerFavoritos(usuarioId)
+            } catch (e: IOException) {
+                // sin conexión: la lista de favoritos queda igual
+            } catch (e: HttpException) {
+                // error del servidor: la lista de favoritos queda igual
+            }
+        }
+    }
     fun aumentarLetra() {
         if (_tamanoLetra.value < TAMANO_MAXIMO) _tamanoLetra.value += PASO_LETRA
     }
@@ -83,18 +113,10 @@ class NormaViewModel : ViewModel() {
         const val TAMANO_MAXIMO = 28
         const val PASO_LETRA = 2
     }
-    class NormaViewModel : ViewModel() {
-        private val repository = NormaRepository()
-        private val _normas = MutableStateFlow<List<Norma>>(emptyList())
-        val normas: StateFlow<List<Norma>> = _normas
-
-        init {
-            obtenerNormas()
-        }
-        private fun obtenerNormas() {
-            viewModelScope.launch {
-                _normas.value = repository.obtenerNormas()
-            }
+    class Factory(private val repository: NormaRepository) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            @Suppress("UNCHECKED_CAST")
+            return NormaViewModel(repository) as T
         }
     }
 }

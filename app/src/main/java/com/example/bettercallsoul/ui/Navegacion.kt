@@ -30,6 +30,7 @@ fun Navegacion(
             ArticulosScreen(
                 viewModel = viewModel,
                 normaId = normaId,
+                usuarioId = loginViewModel.usuario?.id ?: 0,
                 onVolver = { navController.popBackStack() }
             )
         }

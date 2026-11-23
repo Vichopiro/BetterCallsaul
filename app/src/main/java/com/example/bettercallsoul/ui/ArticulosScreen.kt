@@ -22,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -41,9 +42,10 @@ import com.example.bettercallsoul.viewmodel.EstadoCarga
 import com.example.bettercallsoul.viewmodel.NormaViewModel
 
 @Composable
-fun ArticulosScreen(viewModel: NormaViewModel, normaId: Int, onVolver: () -> Unit) {
+fun ArticulosScreen(viewModel: NormaViewModel, normaId: Int, usuarioId: Int, onVolver: () -> Unit) {
     val normas by viewModel.normas.collectAsState()
     val articulos by viewModel.articulos.collectAsState()
+    val favoritos by viewModel.favoritos.collectAsState()
     val estadoArticulos by viewModel.estadoArticulos.collectAsState()
     val tamano by viewModel.tamanoLetra.collectAsState()
     val norma = normas.find { it.id == normaId }
@@ -66,6 +68,7 @@ fun ArticulosScreen(viewModel: NormaViewModel, normaId: Int, onVolver: () -> Uni
 
     LaunchedEffect(normaId) {
         viewModel.cargarArticulos(normaId)
+        viewModel.cargarFavoritos(usuarioId)
     }
 
     Column(
@@ -131,6 +134,13 @@ fun ArticulosScreen(viewModel: NormaViewModel, normaId: Int, onVolver: () -> Uni
                                 color = Color.White,
                                 fontSize = tamano.sp
                             )
+                            val esFavorito = favoritos.any { it.articuloId == articulo.id }
+                            TextButton(onClick = { viewModel.alternarFavorito(usuarioId, articulo.id) }) {
+                                Text(
+                                    text = if (esFavorito) "★ Quitar de favoritos" else "☆ Guardar en favoritos",
+                                    color = Amarillo
+                                )
+                            }
                         }
                         HorizontalDivider(color = Gris)
                     }

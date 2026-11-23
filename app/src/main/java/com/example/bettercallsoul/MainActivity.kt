@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import com.example.bettercallsoul.repository.NormaRepositoryImpl
 import com.example.bettercallsoul.ui.LoginScreen
 import com.example.bettercallsoul.ui.Navegacion
 import com.example.bettercallsoul.ui.RegistroScreen
@@ -19,7 +20,9 @@ import com.example.bettercallsoul.viewmodel.NormaViewModel
 
 class MainActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
-    private val normaViewModel: NormaViewModel by viewModels()
+    private val normaViewModel: NormaViewModel by viewModels { NormaViewModel.Factory(
+        NormaRepositoryImpl()
+    ) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

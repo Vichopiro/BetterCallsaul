@@ -1,37 +1,36 @@
 package com.example.bettercallsoul.repository
 
-import com.example.bettercallsoul.data.UsuarioDao
-import com.example.bettercallsoul.data.UsuarioEntity
 import com.example.bettercallsoul.model.Usuario
+import com.example.bettercallsoul.remote.ApiService
+import com.example.bettercallsoul.remote.RetrofitInstance
 import java.security.MessageDigest
 
-class UsuarioRepository(private val usuarioDao: UsuarioDao) {
-
-    suspend fun registrar(nombre: String, apellido: String, correo: String, clave: String): Usuario? {
-        if (usuarioDao.buscarPorCorreo(correo) != null) return null
-        val nuevo = UsuarioEntity(
-            nombre = nombre,
-            apellido = apellido,
-            correo = correo,
-            claveHash = encriptar(clave)
+class UsuarioRepository(
+    private val api: ApiService = RetrofitInstance.crearApi()
+){
+    suspend fun registrar(nombre: String, apellido: String, correo: String, clave: String): Usuario =
+        api.registrarUsuario(
+            mapOf(
+                "usuario" to mapOf(
+                    "nombre" to nombre,
+                    "apellido" to apellido,
+                    "correo" to correo,
+                    "clave" to encriptar(clave)
+                )
+            )
         )
-        val idGenerado = usuarioDao.insertar(nuevo).toInt()
-        return nuevo.copy(id = idGenerado).aUsuario()
-    }
 
-    suspend fun iniciarSesion(correo: String, clave: String): Usuario? {
-        val guardado = usuarioDao.buscarPorCorreo(correo) ?: return null
-        return if (guardado.claveHash == encriptar(clave)) guardado.aUsuario() else null
-    }
-    suspend fun buscarPorId(id: Int): Usuario? = usuarioDao.buscarPorId(id)?.aUsuario()
+    suspend fun iniciarSesion(correo: String, clave: String): Usuario =
+        api.iniciarSesion(mapOf("correo" to correo, "clave" to encriptar(clave)))
+
+    suspend fun buscarPorId(id: Int): Usuario = api.obtenerUsuario(id)
+
     suspend fun actualizarFoto(idUsuario: Int, ruta: String) {
-        usuarioDao.actualizarFoto(idUsuario, ruta)
+        api.actualizarFoto(idUsuario, mapOf("usuario" to mapOf("fotoPath" to ruta)))
     }
 
     private fun encriptar(clave: String): String =
         MessageDigest.getInstance("SHA-256")
             .digest(clave.toByteArray())
             .joinToString("") { "%02x".format(it) }
-
-    private fun UsuarioEntity.aUsuario() = Usuario(id, nombre, apellido, correo, fotoPath)
 }

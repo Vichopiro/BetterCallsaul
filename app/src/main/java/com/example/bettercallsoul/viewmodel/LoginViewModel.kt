@@ -8,14 +8,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.bettercallsoul.data.AppDatabase
 import com.example.bettercallsoul.model.Usuario
 import com.example.bettercallsoul.repository.UsuarioRepository
 import java.io.File
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = UsuarioRepository(AppDatabase.obtener(application).usuarioDao())
+    private val repository = UsuarioRepository()
     private val prefs = application.getSharedPreferences(NOMBRE_PREFS, Context.MODE_PRIVATE)
     var nombre by mutableStateOf("")
         private set
@@ -48,7 +49,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         if (idGuardado != -1) {
             cargandoSesion = true
             viewModelScope.launch {
-                usuario = repository.buscarPorId(idGuardado)
+                try {
+                    usuario = repository.buscarPorId(idGuardado)
+                } catch (e: IOException) {
+                    usuario = null
+                } catch (e: HttpException) {
+                    usuario = null
+                }
                 cargandoSesion = false
             }
         }
@@ -88,12 +95,14 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun iniciarSesion() {
         if (!validarCorreoYClave()) return
         viewModelScope.launch {
-            val encontrado = repository.iniciarSesion(correo.trim().lowercase(), clave)
-            if (encontrado == null) {
-                errorCredenciales = MENSAJE_CREDENCIALES_INVALIDAS
-            } else {
+            try {
+                val encontrado = repository.iniciarSesion(correo.trim().lowercase(), clave)
                 guardarSesion(encontrado.id)
                 usuario = encontrado
+            } catch (e: HttpException) {
+                errorCredenciales = MENSAJE_CREDENCIALES_INVALIDAS
+            } catch (e: IOException) {
+                errorCredenciales = MENSAJE_SIN_CONEXION
             }
         }
     }
@@ -103,17 +112,19 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         val credencialesValidas = validarCorreoYClave()
         if (!datosPersonalesValidos || !credencialesValidas) return
         viewModelScope.launch {
-            val nuevo = repository.registrar(
-                nombre = nombre.trim(),
-                apellido = apellido.trim(),
-                correo = correo.trim().lowercase(),
-                clave = clave
-            )
-            if (nuevo == null) {
-                errorCorreo = MENSAJE_CORREO_REPETIDO
-            } else {
+            try {
+                val nuevo = repository.registrar(
+                    nombre = nombre.trim(),
+                    apellido = apellido.trim(),
+                    correo = correo.trim().lowercase(),
+                    clave = clave
+                )
                 guardarSesion(nuevo.id)
                 usuario = nuevo
+            } catch (e: HttpException) {
+                errorCorreo = MENSAJE_CORREO_REPETIDO
+            } catch (e: IOException) {
+                errorCorreo = MENSAJE_SIN_CONEXION
             }
         }
     }
@@ -121,9 +132,15 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun actualizarFoto(ruta: String) {
         val actual = usuario ?: return
         viewModelScope.launch {
-            repository.actualizarFoto(actual.id, ruta)
-            actual.fotoPath?.let { File(it).delete() }
-            usuario = actual.copy(fotoPath = ruta)
+            try {
+                repository.actualizarFoto(actual.id, ruta)
+                actual.fotoPath?.let { File(it).delete() }
+                usuario = actual.copy(fotoPath = ruta)
+            } catch (e: IOException) {
+                // sin conexión: se mantiene la foto anterior
+            } catch (e: HttpException) {
+                // error del servidor: se mantiene la foto anterior
+            }
         }
     }
 
@@ -174,5 +191,6 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         const val LARGO_MINIMO_CLAVE = 6
         const val MENSAJE_CREDENCIALES_INVALIDAS = "Correo o contraseña incorrectos"
         const val MENSAJE_CORREO_REPETIDO = "Este correo ya está registrado"
+        const val MENSAJE_SIN_CONEXION = "No hay conexión con el servidor"
     }
 }
