@@ -1,5 +1,9 @@
 package com.example.bettercallsoul.ui
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,9 +29,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.bettercallsoul.notificacion.Notificador
 import com.example.bettercallsoul.ui.theme.Amarillo
 import com.example.bettercallsoul.ui.theme.Fondo
 import com.example.bettercallsoul.ui.theme.Gris
@@ -42,9 +48,21 @@ fun ArticulosScreen(viewModel: NormaViewModel, normaId: Int, onVolver: () -> Uni
     val tamano by viewModel.tamanoLetra.collectAsState()
     val norma = normas.find { it.id == normaId }
     val colores = buttonColors(
+
         containerColor = Amarillo,
         contentColor = Color.Black
     )
+
+    val context = LocalContext.current
+    val mensajeRecordatorio = "Revisa ${norma?.nombre ?: "esta norma"} cuando tengas un momento."
+    // pide el permiso de las notis, si lo hace muestra el recordatorio
+    val pedirPermisoNotificaciones = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { concedido ->
+        if (concedido) {
+            Notificador.mostrarRecordatorio(context, "Recordatorio de lectura", mensajeRecordatorio)
+        }
+    }
 
     LaunchedEffect(normaId) {
         viewModel.cargarArticulos(normaId)
@@ -119,6 +137,22 @@ fun ArticulosScreen(viewModel: NormaViewModel, normaId: Int, onVolver: () -> Uni
                 }
             }
         }
+
+        Button(
+            onClick = {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    pedirPermisoNotificaciones.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    Notificador.mostrarRecordatorio(context, "Recordatorio de lectura", mensajeRecordatorio)
+                }
+            },
+            colors = colores,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Recordarme esta norma", fontWeight = FontWeight.Bold)
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
 
         Button(
             onClick = onVolver,
