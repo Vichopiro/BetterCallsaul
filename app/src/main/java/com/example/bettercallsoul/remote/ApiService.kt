@@ -15,7 +15,7 @@ import retrofit2.http.Query
 @JvmSuppressWildcards
 interface ApiService {
 
-    @GET("norma")
+    @GET("normas")
     suspend fun obtenerNormas(): List<Norma>
 
     @GET("articulo")
