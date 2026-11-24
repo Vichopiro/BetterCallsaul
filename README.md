@@ -29,7 +29,7 @@ La base de datos tiene las tablas `usuario`, `norma`, `articulo` y `favorito`.
 
 | Método | Endpoint | Uso |
 |---|---|---|
-| GET | `/norma` | Lista las normas |
+| GET | `/normas` | Lista las normas |
 | GET | `/articulo?normaId=` | Lista los artículos de una norma |
 | POST | `/usuario` | Registra un usuario |
 | POST | `/login` | Inicia sesión |
